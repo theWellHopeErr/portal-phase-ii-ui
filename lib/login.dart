@@ -46,10 +46,12 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   late String username;
   late String password;
+  late String error = '';
+  late bool loading = false;
 
   Future<String> logIn() async {
     late Map<String, String> body = {"name": username, "job": password};
-
+    loading = true;
     var response = await http.post(
       Uri.parse('https://reqres.in/api/users'),
       headers: {
@@ -66,12 +68,19 @@ class _LoginFormState extends State<LoginForm> {
         ),
       );
 
+      setState(() {
+        loading = false;
+      });
       return '''{
                 "token": "Fly, You Fools!", 
                 "plant": "${responseBody['id']}", 
                 "plantGroup": "${responseBody['createdAt']}"
                 }''';
     } else {
+      setState(() {
+        loading = false;
+        error = 'Incorrect Credentials';
+      });
       throw Exception('Unauthorized');
     }
   }
@@ -125,29 +134,50 @@ class _LoginFormState extends State<LoginForm> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: MaterialButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      logIn().then((value) async {
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
-                        prefs.setString('userCreds', value.toString());
+                child: Column(
+                  children: [
+                    Visibility(
+                      visible: error.isNotEmpty,
+                      child: Text(error),
+                    ),
+                    Visibility(
+                      visible: loading,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    ),
+                    Visibility(
+                      visible: !loading,
+                      child: MaterialButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              loading = true;
+                            });
+                            logIn().then((value) async {
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              prefs.setString('userCreds', value.toString());
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => MyApp()),
-                        );
-                      });
-                    }
-                  },
-                  child: Text('Submit'),
-                  height: 50,
-                  minWidth: double.infinity,
-                  color: Colors.white,
-                  textColor: Theme.of(context).primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(50),
-                  ),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MyApp()),
+                              );
+                            });
+                          }
+                        },
+                        child: Text('Submit'),
+                        height: 50,
+                        minWidth: double.infinity,
+                        color: Colors.white,
+                        textColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(50),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
