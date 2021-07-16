@@ -11,11 +11,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sliver_fab: ^1.0.0
-  firebase_core: ^1.2.0
-  firebase_messaging: ^10.0.0
   overlay_support: ^1.2.1
   http: ^0.13.3
+  firebase_core: ^1.2.0
+  firebase_messaging: ^10.0.0
+  sliver_fab: ^1.0.0
+  pull_to_refresh: ^2.0.0
 
 dev_dependencies:
   flutter_test:

@@ -30,6 +30,7 @@ class _WorkOrderWidgetState extends State<WorkOrderWidget> {
               title: Text(
                 "Work Orders",
                 textAlign: TextAlign.center,
+                style: TextStyle(fontFamily: 'Montserrat'),
               ),
             ),
             actions: [
@@ -39,6 +40,7 @@ class _WorkOrderWidgetState extends State<WorkOrderWidget> {
                     'Log Out',
                     style: TextStyle(
                       fontFamily: 'Montserrat',
+                      fontWeight: FontWeight.w500,
                       color: Colors.red,
                     ),
                   ),

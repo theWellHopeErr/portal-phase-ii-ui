@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:portal_phase_ii_ui/Notification/notification.dart';
+import 'package:portal_phase_ii_ui/notification/notifications-list.dart';
 import 'package:portal_phase_ii_ui/work-order/WorkOrder.dart';
 
 class HomeWidget extends StatefulWidget {
@@ -22,7 +22,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   int _selectedIndex = 0;
   static final List<Widget> _widgetOptions = <Widget>[
     WorkOrderWidget(),
-    NotificationWidget(),
+    NotificationsListWidget(),
   ];
 
   void _onItemTapped(int index) {
@@ -38,7 +38,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         child: DefaultTextStyle.merge(
           style: TextStyle(color: Colors.grey[850]),
           child: Container(
-            color: Colors.white,
+            color: const Color(0xfff3f3f3),
             width: double.infinity,
             height: double.infinity,
             child: _widgetOptions.elementAt(_selectedIndex),

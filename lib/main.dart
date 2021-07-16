@@ -55,6 +55,7 @@ class _LandingWidgetState extends State<LandingWidget> {
     super.initState();
     // clearUserCreds();
     getUserCreds().then((value) {
+      print(value);
       setState(() {
         userCred = value;
       });
