@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:portal_phase_ii_ui/notification/notification-create.dart';
-import 'package:portal_phase_ii_ui/notification/notification-item.dart';
 import 'package:sliver_fab/sliver_fab.dart';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:portal_phase_ii_ui/notification/notification-create.dart';
+import 'package:portal_phase_ii_ui/notification/notification-item.dart';
 import 'package:portal_phase_ii_ui/helpers.dart';
 import 'package:portal_phase_ii_ui/main.dart';
 
@@ -17,25 +18,35 @@ class NotificationsListWidget extends StatefulWidget {
 }
 
 class _NotificationsListWidgetState extends State<NotificationsListWidget> {
+  var woResult;
+
   Future fetchList() async {
-    var result = await http.get(Uri.parse(
-        'https://run.mocky.io/v3/af859683-2712-4c94-bd68-b79aa129eb9a'));
-    return json.decode(result.body);
+    final _accessToken = (await getUserCreds())['token'];
+    var result = await http.get(
+      Uri.parse('http://192.168.1.8:3000/maintenance/notification-list'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $_accessToken',
+      },
+    );
+    setState(() {
+      woResult = json.decode(result.body);
+    });
   }
 
   Future<List<dynamic>> fetchNOPRList() async {
-    var result = await fetchList();
-    return result['data'];
+    if (woResult == null || woResult?.isEmpty) await fetchList();
+    var result = woResult['nopr']['item'];
+    return result.sublist(0, result.length > 10 ? 11 : result.length);
   }
 
   Future<List<dynamic>> fetchOSNOList() async {
-    var result = await fetchList();
-    return result['data'];
+    var result = woResult['osno']['item'];
+    return result.sublist(0, result.length > 10 ? 11 : result.length);
   }
 
   Future<List<dynamic>> fetchNOCOList() async {
-    var result = await fetchList();
-    return result['data'];
+    var result = woResult['noco']['item'];
+    return result.sublist(0, result.length > 10 ? 11 : result.length);
   }
 
   @override

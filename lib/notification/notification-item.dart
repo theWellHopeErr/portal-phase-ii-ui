@@ -38,7 +38,7 @@ class NotificationItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        snapshot.data[index]['NOTIFICAT'],
+                        "${int.parse(snapshot.data[index]['NOTIFICAT'])}",
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
@@ -61,7 +61,10 @@ class NotificationItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            snapshot.data[index]['DESCRIPT'],
+                            snapshot.data[index]['DESCRIPT'].isEmpty
+                                ? 'General Mainte...'
+                                : snapshot.data[index]['DESCRIPT'],
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                             ),
@@ -81,18 +84,19 @@ class NotificationItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        snapshot.data[index]['PR'],
+                        snapshot.data[index]['PRIOTYPE'],
                         style: TextStyle(
                           fontSize: 12,
                         ),
                       ),
                       SizedBox(height: 6),
                       Text(
-                        getPriority(snapshot.data[index]['P']),
+                        getPriority("${snapshot.data[index]['PRIORITY']}"),
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 11,
-                          color: getPriorityColor(snapshot.data[index]['P']),
+                          color: getPriorityColor(
+                              '${snapshot.data[index]['PRIORITY']}'),
                         ),
                       ),
                     ],
