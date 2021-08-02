@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:portal_phase_ii_ui/notification/notifications-list.dart';
-import 'package:portal_phase_ii_ui/work-order/WorkOrder.dart';
+import 'package:portal_phase_ii_ui/work-order/workorders-list.dart';
 
 class HomeWidget extends StatefulWidget {
   final String plant;
-  final String plantGroup;
-  const HomeWidget({Key? key, required this.plant, required this.plantGroup})
+  final String planGroup;
+  const HomeWidget({Key? key, required this.plant, required this.planGroup})
       : super(key: key);
 
   @override
   _HomeWidgetState createState() =>
-      _HomeWidgetState(this.plant, this.plantGroup);
+      _HomeWidgetState(this.plant, this.planGroup);
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
   final String plant;
-  final String plantGroup;
+  final String planGroup;
 
-  _HomeWidgetState(this.plant, this.plantGroup);
+  _HomeWidgetState(this.plant, this.planGroup);
 
   int _selectedIndex = 0;
   static final List<Widget> _widgetOptions = <Widget>[
-    WorkOrderWidget(),
+    WorkOrderListWidget(),
     NotificationsListWidget(),
   ];
 

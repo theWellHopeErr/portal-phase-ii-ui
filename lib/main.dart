@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
     return MaterialApp(
-      title: 'FCM',
+      title: 'Maintenance Portal',
       theme: ThemeData.dark().copyWith(
         primaryColor: Color(0xFF591EFF),
         primaryColorLight: Color(0xFF9977F9),
@@ -47,13 +47,12 @@ class _LandingWidgetState extends State<LandingWidget> {
   Map userCred = <String, String>{
     'token': '',
     'plant': 'SA01',
-    'plantGroup': '010',
+    'planGroup': '010',
   };
 
   @override
   void initState() {
     super.initState();
-    // clearUserCreds();
     getUserCreds().then((value) {
       print(value);
       setState(() {
@@ -70,7 +69,7 @@ class _LandingWidgetState extends State<LandingWidget> {
             ? LoginWidget()
             : HomeWidget(
                 plant: userCred['plant'],
-                plantGroup: userCred['plantGroup'],
+                planGroup: userCred['planGroup'],
               ))(),
       ),
     );

@@ -50,32 +50,43 @@ class _LoginFormState extends State<LoginForm> {
   late bool loading = false;
 
   Future<String> logIn() async {
-    late Map<String, String> body = {"name": username, "job": password};
+    late Map<String, String> body = {
+      "username": username.toUpperCase(),
+      "password": password,
+      "role": "maintenance"
+    };
     loading = true;
     var response = await http.post(
-      Uri.parse('https://reqres.in/api/users'),
+      Uri.parse('http://192.168.1.8:3000/login'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(body),
     );
-
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       late Map<String, dynamic> responseBody = json.decode(response.body);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Logged In!"),
-        ),
-      );
+      if (responseBody['accessToken'].isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Logged In!"),
+          ),
+        );
 
-      setState(() {
-        loading = false;
-      });
-      return '''{
-                "token": "Fly, You Fools!", 
-                "plant": "${responseBody['id']}", 
-                "plantGroup": "${responseBody['createdAt']}"
+        setState(() {
+          loading = false;
+        });
+        return '''{
+                "token": "${responseBody['accessToken']}", 
+                "plant": "${responseBody['username']}", 
+                "planGroup": "${responseBody['plangrp']}"
                 }''';
+      } else {
+        setState(() {
+          loading = false;
+          error = responseBody['message'];
+        });
+        throw Exception('Unauthorized');
+      }
     } else {
       setState(() {
         loading = false;
@@ -96,15 +107,19 @@ class _LoginFormState extends State<LoginForm> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter Username';
+                    return 'Please enter Plant No.';
                   }
                   username = value;
                   return null;
                 },
                 decoration: new InputDecoration(
-                  hintText: "Username",
+                  labelText: "Plant",
+                  labelStyle: new TextStyle(
+                    color: Colors.grey[300],
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: const BorderRadius.all(
                       Radius.circular(50.0),
@@ -115,6 +130,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
               SizedBox(height: 10),
               TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Password';
@@ -123,7 +139,10 @@ class _LoginFormState extends State<LoginForm> {
                   return null;
                 },
                 decoration: new InputDecoration(
-                  hintText: "Password",
+                  labelText: "Password",
+                  labelStyle: new TextStyle(
+                    color: Colors.grey[300],
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: const BorderRadius.all(
                       Radius.circular(50.0),

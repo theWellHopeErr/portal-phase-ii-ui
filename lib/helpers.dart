@@ -43,3 +43,14 @@ dynamic getPriorityColor(String val) {
       return Colors.black;
   }
 }
+
+dynamic getWorkActivityColor(String val) {
+  switch (val) {
+    case 'CRTD':
+      return Colors.orange;
+    case 'TECO':
+      return Colors.green;
+    default:
+      return Colors.red;
+  }
+}
