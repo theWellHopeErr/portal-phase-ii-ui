@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:portal_phase_ii_ui/work-order/workorder-create.dart';
-import 'package:portal_phase_ii_ui/work-order/workorder-item.dart';
+import 'package:portal_phase_ii_ui/work-order/workorder-list-item.dart';
 import 'package:portal_phase_ii_ui/helpers.dart';
 import 'package:portal_phase_ii_ui/main.dart';
 
@@ -133,7 +133,7 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
                               padding: EdgeInsets.all(8),
                               itemCount: snapshot.data.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return WorkOrderItem(
+                                return WorkOrderListItem(
                                     snapshot: snapshot, index: index);
                               },
                             );
@@ -176,7 +176,7 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
                               padding: EdgeInsets.all(8),
                               itemCount: snapshot.data.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return WorkOrderItem(
+                                return WorkOrderListItem(
                                     snapshot: snapshot, index: index);
                               },
                             );
@@ -219,7 +219,7 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
                               padding: EdgeInsets.all(8),
                               itemCount: snapshot.data.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return WorkOrderItem(
+                                return WorkOrderListItem(
                                     snapshot: snapshot, index: index);
                               },
                             );

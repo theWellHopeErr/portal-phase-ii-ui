@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:portal_phase_ii_ui/notification/notification-create.dart';
-import 'package:portal_phase_ii_ui/notification/notification-item.dart';
+import 'package:portal_phase_ii_ui/notification/notification-list-item.dart';
 import 'package:portal_phase_ii_ui/helpers.dart';
 import 'package:portal_phase_ii_ui/main.dart';
 
@@ -130,7 +130,7 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
                               padding: EdgeInsets.all(8),
                               itemCount: snapshot.data.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return NotificationItem(
+                                return NotificationListItem(
                                     snapshot: snapshot, index: index);
                               },
                             );
@@ -173,7 +173,7 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
                               padding: EdgeInsets.all(8),
                               itemCount: snapshot.data.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return NotificationItem(
+                                return NotificationListItem(
                                     snapshot: snapshot, index: index);
                               },
                             );
@@ -216,7 +216,7 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
                               padding: EdgeInsets.all(8),
                               itemCount: snapshot.data.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return NotificationItem(
+                                return NotificationListItem(
                                     snapshot: snapshot, index: index);
                               },
                             );

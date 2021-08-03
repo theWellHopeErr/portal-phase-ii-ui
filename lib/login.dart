@@ -131,6 +131,7 @@ class _LoginFormState extends State<LoginForm> {
               SizedBox(height: 10),
               TextFormField(
                 autovalidateMode: AutovalidateMode.onUserInteraction,
+                obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter Password';
