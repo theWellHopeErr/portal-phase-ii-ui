@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "775435490729",
+    "project_id": "maintenance-portal-be5f5",
+    "storage_bucket": "maintenance-portal-be5f5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775435490729:android:47e8000434f3102d8a60b8",
+        "android_client_info": {
+          "package_name": "com.example.portal_phase_ii_ui"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "775435490729-sdutp3m9dt2me95e2es2h9e1u7t7kaqm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwFmC9gW5iXHP1OcjYx5g5IAXrG5xSrqU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "775435490729-sdutp3m9dt2me95e2es2h9e1u7t7kaqm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
