@@ -298,7 +298,8 @@ class _NotificationItemState extends State<NotificationItem> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Text('${notification['EQUIPMENT']}'),
+                      Text(
+                          '${isNumeric(notification['EQUIPMENT']) ? int.parse(notification['EQUIPMENT']) : notification['EQUIPMENT']}'),
                       SizedBox(
                         height: 60,
                       ),
