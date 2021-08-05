@@ -18,7 +18,7 @@ class NotificationsListWidget extends StatefulWidget {
 }
 
 class _NotificationsListWidgetState extends State<NotificationsListWidget> {
-  var woResult;
+  var notifResult;
 
   Future fetchList() async {
     final _accessToken = (await getUserCreds())['token'];
@@ -29,24 +29,29 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
       },
     );
     setState(() {
-      woResult = json.decode(result.body);
+      notifResult = json.decode(result.body);
     });
   }
 
   Future<List<dynamic>> fetchNOPRList() async {
-    if (woResult == null || woResult?.isEmpty) await fetchList();
-    var result = woResult['nopr']['item'];
+    if (notifResult == null || notifResult?.isEmpty) await fetchList();
+    var result = notifResult['nopr']['item'];
     return result.sublist(0, result.length > 10 ? 11 : result.length);
   }
 
   Future<List<dynamic>> fetchOSNOList() async {
-    var result = woResult['osno']['item'];
+    var result = notifResult['osno']['item'];
     return result.sublist(0, result.length > 10 ? 11 : result.length);
   }
 
   Future<List<dynamic>> fetchNOCOList() async {
-    var result = woResult['noco']['item'];
+    var result = notifResult['noco']['item'];
     return result.sublist(0, result.length > 10 ? 11 : result.length);
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -242,140 +247,4 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
       ),
     );
   }
-
-  // showMenu() {
-  //   showModalBottomSheet(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return Container(
-  //           decoration: BoxDecoration(
-  //             borderRadius: BorderRadius.only(
-  //               topLeft: Radius.circular(16.0),
-  //               topRight: Radius.circular(16.0),
-  //             ),
-  //             color: Color(0xff232f34),
-  //           ),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             crossAxisAlignment: CrossAxisAlignment.end,
-  //             children: <Widget>[
-  //               Container(
-  //                 height: 36,
-  //               ),
-  //               SizedBox(
-  //                   height: (56 * 6).toDouble(),
-  //                   child: Container(
-  //                       decoration: BoxDecoration(
-  //                         borderRadius: BorderRadius.only(
-  //                           topLeft: Radius.circular(16.0),
-  //                           topRight: Radius.circular(16.0),
-  //                         ),
-  //                         color: Color(0xff344955),
-  //                       ),
-  //                       child: Stack(
-  //                         alignment: Alignment(0, 0),
-  //                         overflow: Overflow.visible,
-  //                         children: <Widget>[
-  //                           Positioned(
-  //                             top: -36,
-  //                             child: Container(
-  //                               decoration: BoxDecoration(
-  //                                   borderRadius:
-  //                                       BorderRadius.all(Radius.circular(50)),
-  //                                   border: Border.all(
-  //                                       color: Color(0xff232f34), width: 10)),
-  //                               child: Center(
-  //                                 child: ClipOval(
-  //                                   child: Icon(
-  //                                     Icons.add_outlined,
-  //                                     color: Colors.red,
-  //                                   ),
-  //                                 ),
-  //                               ),
-  //                             ),
-  //                           ),
-  //                           Positioned(
-  //                             child: ListView(
-  //                               physics: NeverScrollableScrollPhysics(),
-  //                               children: <Widget>[
-  //                                 ListTile(
-  //                                   title: Text(
-  //                                     "Inbox",
-  //                                     style: TextStyle(color: Colors.white),
-  //                                   ),
-  //                                   leading: Icon(
-  //                                     Icons.inbox,
-  //                                     color: Colors.white,
-  //                                   ),
-  //                                   onTap: () {},
-  //                                 ),
-  //                                 ListTile(
-  //                                   title: Text(
-  //                                     "Starred",
-  //                                     style: TextStyle(color: Colors.white),
-  //                                   ),
-  //                                   leading: Icon(
-  //                                     Icons.star_border,
-  //                                     color: Colors.white,
-  //                                   ),
-  //                                   onTap: () {},
-  //                                 ),
-  //                                 ListTile(
-  //                                   title: Text(
-  //                                     "Sent",
-  //                                     style: TextStyle(color: Colors.white),
-  //                                   ),
-  //                                   leading: Icon(
-  //                                     Icons.send,
-  //                                     color: Colors.white,
-  //                                   ),
-  //                                   onTap: () {},
-  //                                 ),
-  //                                 ListTile(
-  //                                   title: Text(
-  //                                     "Trash",
-  //                                     style: TextStyle(color: Colors.white),
-  //                                   ),
-  //                                   leading: Icon(
-  //                                     Icons.delete_outline,
-  //                                     color: Colors.white,
-  //                                   ),
-  //                                   onTap: () {},
-  //                                 ),
-  //                                 ListTile(
-  //                                   title: Text(
-  //                                     "Spam",
-  //                                     style: TextStyle(color: Colors.white),
-  //                                   ),
-  //                                   leading: Icon(
-  //                                     Icons.error,
-  //                                     color: Colors.white,
-  //                                   ),
-  //                                   onTap: () {},
-  //                                 ),
-  //                                 ListTile(
-  //                                   title: Text(
-  //                                     "Drafts",
-  //                                     style: TextStyle(color: Colors.white),
-  //                                   ),
-  //                                   leading: Icon(
-  //                                     Icons.mail_outline,
-  //                                     color: Colors.white,
-  //                                   ),
-  //                                   onTap: () {},
-  //                                 ),
-  //                               ],
-  //                             ),
-  //                           )
-  //                         ],
-  //                       ))),
-  //               Container(
-  //                 height: 56,
-  //                 color: Color(0xff4a6572),
-  //               )
-  //             ],
-  //           ),
-  //         );
-  //       });
-  // }
 }
