@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:portal_phase_ii_ui/helpers.dart';
@@ -15,9 +16,24 @@ class NotificationItem extends StatefulWidget {
 
 class _NotificationItemState extends State<NotificationItem> {
   var notifNo;
-  var notification;
+  Map<String, dynamic> notification = {
+    "NOTIF_NO": "0",
+    "LOC_ACC": "0",
+    "EQUIPMENT": "Loading...",
+    "SHORT_TEXT": "Loading...",
+    "STRMLFNDATE": DateFormat('dd-MM-yyyy').format(DateTime.now()),
+    "PRIORITY": "Loading...",
+    "REPORTEDBY": "Loading...",
+  };
   var defaultNotification;
   bool isEditable = false;
+  String error = '';
+  String message = '';
+  bool loading = false;
+
+  final priorityController = TextEditingController();
+  final shortDescController = TextEditingController();
+  final reportedByController = TextEditingController();
 
   _NotificationItemState(this.notifNo);
 
@@ -25,7 +41,7 @@ class _NotificationItemState extends State<NotificationItem> {
     final _accessToken = (await getUserCreds())['token'];
     var result = await http.get(
       Uri.parse(
-          'http://192.168.1.8:3000/maintenance/notification-det?no=$notifNo'),
+          'http://$hostAddress:3000/maintenance/notification-det?no=$notifNo'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $_accessToken',
       },
@@ -34,31 +50,97 @@ class _NotificationItemState extends State<NotificationItem> {
     setState(() {
       notification =
           new Map<String, dynamic>.from(json.decode(result.body))['header'];
-      // notification['NOTIF_NO'] = jsonResult['NOTIF_NO'];
-      // notification['LOC_ACC'] = jsonResult['LOC_ACC'];
-      // notification['EQUIPMENT'] = jsonResult['EQUIPMENT'];
-      // notification['SHORT_TEXT'] = jsonResult['SHORT_TEXT'];
-      // notification['STRMLFNDATE'] = jsonResult['STRMLFNDATE'];
-      // notification['PRIORITY'] = jsonResult['PRIORITY'];
-      // notification['REPORTEDBY'] = jsonResult['REPORTEDBY'];
+      notification['STRMLFNDATE'] = DateFormat('dd-MM-yyyy')
+          .format(DateTime.parse(notification['STRMLFNDATE']));
+
+      priorityController.text = "${notification['PRIORITY']}";
+      shortDescController.text = "${notification['SHORT_TEXT']}";
+      reportedByController.text = "${notification['REPORTEDBY']}";
 
       defaultNotification =
           new Map<String, dynamic>.from(json.decode(result.body))['header'];
     });
   }
 
+  _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2025),
+    );
+    if (picked != null && picked != notification['STRMLFNDATE'])
+      setState(() {
+        notification['STRMLFNDATE'] = picked;
+      });
+  }
+
   @override
   void initState() {
     super.initState();
     fetchDetails();
-    setState(() {});
+    setState(() {
+      priorityController.text = "${notification['PRIORITY']}";
+      shortDescController.text = "${notification['SHORT_TEXT']}";
+      reportedByController.text = "${notification['REPORTEDBY']}";
+    });
   }
 
-  onSubmit() {
-    print(1);
-    print(notification);
-    print(2);
-    print(defaultNotification);
+  onSubmit() async {
+    setState(() {
+      loading = true;
+      error = "";
+      message = "";
+      notification['PRIORITY'] = priorityController.text;
+      notification['SHORT_TEXT'] = shortDescController.text;
+      notification['REPORTEDBY'] = reportedByController.text;
+    });
+
+    if (notification['STRMLFNDATE'] is String) {
+      print(notification['STRMLFNDATE']);
+      var date = notification['STRMLFNDATE'].split('-');
+      if (date[0].length == 2)
+        notification['STRMLFNDATE'] = "${date[2]}-${date[1]}-${date[0]}";
+    }
+
+    final body = jsonEncode({
+      "notif_no": notifNo,
+      "equip_id": notification['EQUIPMENT'],
+      "func_loc": notification['LOC_ACC'],
+      "text": notification['SHORT_TEXT'],
+      "start_mal_date": '${notification['STRMLFNDATE']}',
+      "reported_by": notification['REPORTEDBY'],
+      "priority": notification['PRIORITY']
+    });
+
+    print(body);
+
+    final _accessToken = (await getUserCreds())['token'];
+
+    var response = await http.put(
+      Uri.parse('http://$hostAddress:3000/maintenance/notification'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer $_accessToken',
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      print(json.decode(response.body));
+      setState(() {
+        message = "Updated Successfully.";
+        error = "";
+        loading = false;
+      });
+    } else {
+      setState(() {
+        message = "";
+        error = "Error During Updation... Try again later.";
+        loading = false;
+      });
+      throw Exception('Failed to update Notification.');
+    }
   }
 
   @override
@@ -68,7 +150,9 @@ class _NotificationItemState extends State<NotificationItem> {
         tag: 'item$notifNo',
         child: Scaffold(
           appBar: AppBar(
-            title: Text(notifNo),
+            title: Text(notification['SHORT_TEXT'] == 'Loading...'
+                ? notifNo
+                : notification['SHORT_TEXT']),
             actions: [
               Visibility(
                 visible: !isEditable,
@@ -100,6 +184,11 @@ class _NotificationItemState extends State<NotificationItem> {
                   onPressed: () {
                     setState(() {
                       notification = defaultNotification;
+                      priorityController.text = "${notification['PRIORITY']}";
+                      shortDescController.text =
+                          "${notification['SHORT_TEXT']}";
+                      reportedByController.text =
+                          "${notification['REPORTEDBY']}";
                       isEditable = false;
                     });
                   },
@@ -122,6 +211,37 @@ class _NotificationItemState extends State<NotificationItem> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
+                      Visibility(
+                        visible: loading,
+                        child: CircularProgressIndicator(),
+                      ),
+                      Visibility(
+                        visible: error.isNotEmpty,
+                        child: Text(
+                          error,
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible: message.isNotEmpty,
+                        child: Text(
+                          message,
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible:
+                            message.isNotEmpty || error.isNotEmpty || loading,
+                        child: SizedBox(
+                          height: 30,
+                        ),
+                      ),
                       Text(
                         '${isEditable ? "Edit" : "View"} Notification Details',
                         style: TextStyle(
@@ -183,20 +303,18 @@ class _NotificationItemState extends State<NotificationItem> {
                       SizedBox(
                         height: 60,
                       ),
-                      TextFormField(
-                        initialValue: '${notification['SHORT_TEXT']}',
+                      TextField(
+                        controller: shortDescController,
                         style: TextStyle(
                           color: Colors.grey[700],
                         ),
-                        onChanged: (val) => setState(() {
-                          notification['SHORT_TEXT'] = val;
-                        }),
+                        readOnly: !isEditable,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'Short Description',
-                          labelStyle: new TextStyle(
+                          labelStyle: TextStyle(
                             color: const Color(0xFF424242),
-                            fontWeight: FontWeight.w300,
+                            fontWeight: FontWeight.w500,
                           ),
                           enabledBorder: isEditable
                               ? OutlineInputBorder(
@@ -210,20 +328,18 @@ class _NotificationItemState extends State<NotificationItem> {
                       SizedBox(
                         height: 30,
                       ),
-                      TextFormField(
-                        initialValue: '${notification['PRIORITY']}',
+                      TextField(
+                        controller: priorityController,
                         style: TextStyle(
                           color: Colors.grey[700],
                         ),
-                        onChanged: (val) => setState(() {
-                          notification['PRIORITY'] = val;
-                        }),
+                        readOnly: !isEditable,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'Priority',
-                          labelStyle: new TextStyle(
+                          labelStyle: TextStyle(
                             color: const Color(0xFF424242),
-                            fontWeight: FontWeight.w300,
+                            fontWeight: FontWeight.w500,
                           ),
                           focusedBorder: isEditable
                               ? OutlineInputBorder(
@@ -244,20 +360,18 @@ class _NotificationItemState extends State<NotificationItem> {
                       SizedBox(
                         height: 30,
                       ),
-                      TextFormField(
-                        initialValue: '${notification['REPORTEDBY']}',
+                      TextField(
+                        controller: reportedByController,
                         style: TextStyle(
                           color: Colors.grey[700],
                         ),
-                        onChanged: (val) => setState(() {
-                          notification['REPORTEDBY'] = val;
-                        }),
+                        readOnly: !isEditable,
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'Reported By',
-                          labelStyle: new TextStyle(
+                          labelStyle: TextStyle(
                             color: const Color(0xFF424242),
-                            fontWeight: FontWeight.w300,
+                            fontWeight: FontWeight.w500,
                           ),
                           enabledBorder: isEditable
                               ? OutlineInputBorder(
@@ -271,7 +385,23 @@ class _NotificationItemState extends State<NotificationItem> {
                       SizedBox(
                         height: 30,
                       ),
-                      Text("${notification['STRMLFNDATE']}"),
+                      Row(
+                        children: [
+                          Text(
+                            'Start Malfunction Date: ',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => _selectDate(context),
+                            child: Text(
+                                '${notification['STRMLFNDATE']}'.split(' ')[0]),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

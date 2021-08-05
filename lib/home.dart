@@ -85,12 +85,11 @@ class _HomeWidgetState extends State<HomeWidget> {
           dataTitle: message.data['title'],
           dataBody: message.data['body'],
         );
-
         setState(() {
           _notificationInfo = notification;
-          if (notification.title!.contains('Notification'))
+          if (notification.title!.toLowerCase().contains('notification'))
             _notificationNotifCount++;
-          if (notification.title!.contains('Work Order'))
+          if (notification.title!.toLowerCase().contains('work order'))
             _workorderNotifCount++;
         });
 
@@ -99,9 +98,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           showSimpleNotification(
             Text(_notificationInfo!.title!),
             leading: NotificationBadge(
-                totalNotifications: notification.title!.contains('Work Order')
-                    ? _workorderNotifCount
-                    : _notificationNotifCount),
+                totalNotifications:
+                    notification.title!.toLowerCase().contains('Work Order')
+                        ? _workorderNotifCount
+                        : _notificationNotifCount),
             slideDismissDirection: DismissDirection.horizontal,
             subtitle: Text(_notificationInfo!.body!),
             background: Colors.blueAccent,
@@ -131,18 +131,21 @@ class _HomeWidgetState extends State<HomeWidget> {
 
       setState(() {
         _notificationInfo = notification;
-        if (notification.title!.contains('Notification'))
+        if (notification.title!.toLowerCase().contains('notification'))
           _notificationNotifCount++;
-        if (notification.title!.contains('Work Order')) _workorderNotifCount++;
+        if (notification.title!.toLowerCase().contains('work order'))
+          _workorderNotifCount++;
       });
     }
   }
 
   @override
   void initState() {
-    _notificationNotifCount = 0;
+    super.initState();
 
+    _notificationNotifCount = 0;
     _workorderNotifCount = 0;
+
     registerNotification();
     checkForInitialMessage();
 
@@ -155,16 +158,14 @@ class _HomeWidgetState extends State<HomeWidget> {
         dataTitle: message.data['title'],
         dataBody: message.data['body'],
       );
-
       setState(() {
         _notificationInfo = notification;
-        if (notification.title!.contains('Notification'))
+        if (notification.title!.toLowerCase().contains('notification'))
           _notificationNotifCount++;
-        if (notification.title!.contains('Work Order')) _workorderNotifCount++;
+        if (notification.title!.toLowerCase().contains('work order'))
+          _workorderNotifCount++;
       });
     });
-
-    super.initState();
   }
 
   @override

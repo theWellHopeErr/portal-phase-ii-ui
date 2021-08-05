@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
+const hostAddress = "192.168.42.142";
 
 Future getUserCreds() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

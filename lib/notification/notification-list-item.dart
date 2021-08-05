@@ -18,16 +18,20 @@ class NotificationListItem extends StatelessWidget {
         color: Colors.white,
         child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) {
-                  return NotificationItem(
-                    notifNo: "${int.parse(snapshot.data[index]['NOTIFICAT'])}",
-                  );
-                },
-              ),
-            );
+            if (!snapshot.data[index]['S_STATUS']
+                .toLowerCase()
+                .contains('noco'))
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) {
+                    return NotificationItem(
+                      notifNo:
+                          "${int.parse(snapshot.data[index]['NOTIFICAT'])}",
+                    );
+                  },
+                ),
+              );
           },
           child: DefaultTextStyle.merge(
             style: TextStyle(color: Colors.grey[850]),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:portal_phase_ii_ui/helpers.dart';
 import 'package:portal_phase_ii_ui/main.dart';
 
 class LoginWidget extends StatelessWidget {
@@ -57,7 +58,7 @@ class _LoginFormState extends State<LoginForm> {
     };
     loading = true;
     var response = await http.post(
-      Uri.parse('http://192.168.1.8:3000/login'),
+      Uri.parse('http://$hostAddress:3000/login'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
