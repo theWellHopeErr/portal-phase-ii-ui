@@ -168,6 +168,12 @@ class _LoginFormState extends State<LoginForm> {
                       ),
                     ),
                     Visibility(
+                      visible: error.isNotEmpty || loading,
+                      child: SizedBox(
+                        height: 10,
+                      ),
+                    ),
+                    Visibility(
                       visible: !loading,
                       child: MaterialButton(
                         onPressed: () {
