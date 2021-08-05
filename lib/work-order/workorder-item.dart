@@ -235,7 +235,7 @@ class _WorkOrderItemState extends State<WorkOrderItem> {
                             child: Column(
                               children: [
                                 Text(
-                                  'workorder No',
+                                  'Work Order No',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 13,
@@ -251,7 +251,7 @@ class _WorkOrderItemState extends State<WorkOrderItem> {
                             child: Column(
                               children: [
                                 Text(
-                                  'Local Account',
+                                  'Order Type',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 13,
@@ -275,7 +275,8 @@ class _WorkOrderItemState extends State<WorkOrderItem> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Text('${workorder['EQUIPMENT']}'),
+                      Text(
+                          '${isNumeric(workorder['EQUIPMENT']) ? int.parse(workorder['EQUIPMENT']) : workorder['EQUIPMENT']}'),
                       SizedBox(
                         height: 60,
                       ),
