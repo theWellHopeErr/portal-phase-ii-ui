@@ -97,7 +97,6 @@ class _NotificationItemState extends State<NotificationItem> {
     });
 
     if (notification['STRMLFNDATE'] is String) {
-      print(notification['STRMLFNDATE']);
       var date = notification['STRMLFNDATE'].split('-');
       if (date[0].length == 2)
         notification['STRMLFNDATE'] = "${date[2]}-${date[1]}-${date[0]}";

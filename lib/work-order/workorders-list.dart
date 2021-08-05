@@ -22,7 +22,7 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
   Future fetchList() async {
     final _accessToken = (await getUserCreds())['token'];
     var result = await http.get(
-      Uri.parse('http://192.168.1.8:3000/maintenance/wo-list'),
+      Uri.parse('http://$hostAddress:3000/maintenance/wo-list'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $_accessToken',
       },

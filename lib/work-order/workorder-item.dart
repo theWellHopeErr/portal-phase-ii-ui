@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:portal_phase_ii_ui/helpers.dart';
 
 class WorkOrderItem extends StatefulWidget {
   final snapshot;
@@ -11,27 +16,112 @@ class WorkOrderItem extends StatefulWidget {
       _WorkOrderItemState(this.index, this.snapshot);
 }
 
-// ORDERID - AUFNR - char12
-// SHORTTEXT - AUFTEXT - char40
-// ORDERTYPE - AUFART - char4
-// PR - QMART - char2 => B1 | B2 | B3 | BM | M1 | M2 | M3 | PA | PM | PN
-// PRIORITY - PRIOK - char1 => 1 | 2 | 3 | 4
-// DESCRIPTION - LTXA1 - char40
-// DURATION - ARBEIT - int7
-// EQUIPMENT - EQUNR - char18
-// MATQTY - CO_MENGE - int13
-// RESERVE - RSNUM - int10
-
-// PRIORITY TYPE => CM | G0 | PM | QM | SL | SM | SR
-
 class _WorkOrderItemState extends State<WorkOrderItem> {
   final index;
   final snapshot;
-  final _formKey = GlobalKey<FormState>();
-  final form = {};
-  late bool loading = false;
+  bool isEditable = false;
+  bool loading = false;
+  String error = '';
+  String message = '';
+  Map<String, dynamic> defaultWorkorder = {};
+  Map<String, dynamic> workorder = {
+    "ORDER_TYPE": "Loading...",
+    "MN_WK_CTR": "Loading...",
+    "MN_WKCTR_ID": "Loading...",
+    "EQUIPMENT": "Loading...",
+    "PRIORITY": "Loading...",
+    "DESCRIPTION": "Loading...",
+  };
+
+  final priorityController = TextEditingController();
+  final descController = TextEditingController();
 
   _WorkOrderItemState(this.index, this.snapshot);
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDetails();
+    setState(() {
+      priorityController.text = "${workorder['PRIORITY']}";
+      descController.text = "${workorder['DESCRIPTION']}";
+    });
+  }
+
+  Future fetchDetails() async {
+    final _accessToken = (await getUserCreds())['token'];
+    var result = await http.get(
+      Uri.parse(
+          'http://$hostAddress:3000/maintenance/wo-det?wo=${snapshot.data[index]['ORDERID']}'),
+      headers: {
+        HttpHeaders.authorizationHeader: 'Bearer $_accessToken',
+      },
+    );
+
+    var body = json.decode(result.body);
+
+    setState(() {
+      workorder['ORDER_TYPE'] = body['details']!['ORDER_TYPE'];
+      workorder['EQUIPMENT'] = body['details']!['EQUIPMENT'];
+      workorder['MN_WK_CTR'] = body['details']!['MN_WK_CTR'];
+      workorder['MN_WKCTR_ID'] = body['details']!['MN_WKCTR_ID'];
+      workorder['PRIORITY'] = body['details']!['PRIORITY'];
+      workorder['DESCRIPTION'] = body['operations']!['item'] is List
+          ? body['operations']!['item'][0]!['DESCRIPTION']
+          : body['operations']!['item']['DESCRIPTION'];
+
+      priorityController.text = "${workorder['PRIORITY']}";
+      descController.text = "${workorder['DESCRIPTION']}";
+
+      defaultWorkorder = workorder;
+    });
+  }
+
+  onSubmit() async {
+    setState(() {
+      loading = true;
+      error = "";
+      message = "";
+      workorder['PRIORITY'] = priorityController.text;
+      workorder['DESCRIPTION'] = descController.text;
+    });
+
+    final body = jsonEncode({
+      "order_id": snapshot.data[index]['ORDERID'],
+      "order_type": workorder['ORDER_TYPE'],
+      "equip_id": workorder['EQUIPMENT'],
+      "priority": workorder['PRIORITY'],
+      "opr_desc": workorder['DESCRIPTION'],
+    });
+
+    print(body);
+
+    final _accessToken = (await getUserCreds())['token'];
+
+    var response = await http.put(
+      Uri.parse('http://$hostAddress:3000/maintenance/work-order'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        HttpHeaders.authorizationHeader: 'Bearer $_accessToken',
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        message = "Updated Successfully.";
+        error = "";
+        loading = false;
+      });
+    } else {
+      setState(() {
+        message = "";
+        error = "Error During Updation... Try again later.";
+        loading = false;
+      });
+      throw Exception('Failed to update workorder.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +130,50 @@ class _WorkOrderItemState extends State<WorkOrderItem> {
         tag: 'item$index',
         child: Scaffold(
           appBar: AppBar(
-            title: Text('Edit Work Order'),
+            title: Text(snapshot.data[index]['DESCRIPTION']),
+            actions: [
+              Visibility(
+                visible: !isEditable,
+                child: IconButton(
+                  onPressed: () => setState(() {
+                    isEditable = true;
+                  }),
+                  icon: Icon(Icons.edit),
+                ),
+              ),
+              Visibility(
+                visible: isEditable,
+                child: IconButton(
+                  onPressed: () {
+                    onSubmit();
+                    setState(() {
+                      isEditable = false;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.save,
+                    color: Colors.green,
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: isEditable,
+                child: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      workorder = defaultWorkorder;
+                      priorityController.text = "${workorder['PRIORITY']}";
+                      descController.text = "${workorder['DESCRIPTION']}";
+                      isEditable = false;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.cancel,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
           ),
           body: DefaultTextStyle.merge(
             style: TextStyle(color: Colors.grey[850]),
@@ -50,326 +183,224 @@ class _WorkOrderItemState extends State<WorkOrderItem> {
               width: double.infinity,
               child: Padding(
                 padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Text(
-                          'Work Order ID: ${snapshot.data[index]['ORDERID']}',
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Visibility(
+                        visible: loading,
+                        child: CircularProgressIndicator(),
+                      ),
+                      Visibility(
+                        visible: error.isNotEmpty,
+                        child: Text(
+                          error,
                           style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(
+                      ),
+                      Visibility(
+                        visible: message.isNotEmpty,
+                        child: Text(
+                          message,
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible:
+                            message.isNotEmpty || error.isNotEmpty || loading,
+                        child: SizedBox(
                           height: 30,
                         ),
-                        TextFormField(
-                          readOnly: true,
-                          initialValue: snapshot.data[index]['ORDERID'],
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[700],
-                          ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Work Order Id',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w300,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
+                      ),
+                      Text(
+                        '${isEditable ? "Edit" : "View"} workorder Details',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
                         ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
-                          ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Flexible(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'workorder No',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                    '${int.parse(snapshot.data[index]['ORDERID'])}'),
+                              ],
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
-                          ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
+                          Flexible(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Local Account',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(workorder['ORDER_TYPE']),
+                              ],
                             ),
                           ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Text(
+                        'Equipment ID',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
                         ),
-                        SizedBox(
-                          height: 20,
+                      ),
+                      Text('${workorder['EQUIPMENT']}'),
+                      SizedBox(
+                        height: 60,
+                      ),
+                      TextField(
+                        controller: descController,
+                        style: TextStyle(
+                          color: Colors.grey[700],
                         ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
+                        readOnly: !isEditable,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Short Description',
+                          labelStyle: TextStyle(
+                            color: const Color(0xFF424242),
+                            fontWeight: FontWeight.w500,
                           ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            ),
+                          enabledBorder: isEditable
+                              ? OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      TextField(
+                        controller: priorityController,
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                        ),
+                        readOnly: !isEditable,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Priority',
+                          labelStyle: TextStyle(
+                            color: const Color(0xFF424242),
+                            fontWeight: FontWeight.w500,
                           ),
+                          focusedBorder: isEditable
+                              ? OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : null,
+                          enabledBorder: isEditable
+                              ? OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : null,
                         ),
-                        SizedBox(
-                          height: 20,
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      TextFormField(
+                        initialValue: snapshot.data[index]['PRIOTYPE'],
+                        style: TextStyle(
+                          color: Colors.grey[700],
                         ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
+                        readOnly: !isEditable,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Priority Type',
+                          labelStyle: TextStyle(
+                            color: const Color(0xFF424242),
+                            fontWeight: FontWeight.w500,
                           ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            ),
+                          focusedBorder: isEditable
+                              ? OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : null,
+                          enabledBorder: isEditable
+                              ? OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : null,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      TextFormField(
+                        initialValue: snapshot.data[index]['WORK_CNTR'],
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                        ),
+                        readOnly: !isEditable,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Work Center',
+                          labelStyle: TextStyle(
+                            color: const Color(0xFF424242),
+                            fontWeight: FontWeight.w500,
                           ),
+                          focusedBorder: isEditable
+                              ? OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : null,
+                          enabledBorder: isEditable
+                              ? OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : null,
                         ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
-                          ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
-                          ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
-                          ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
-                          ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: (value) {
-                            if (value == null || value.isEmpty)
-                              return 'Work Order ID is required';
-                            form['id'] = value;
-                            return null;
-                          },
-                          style: TextStyle(
-                            color: Colors.grey[850],
-                          ),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Label text',
-                            labelStyle: new TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w200,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 40,
-                        ),
-                        Visibility(
-                          // visible: !loading,
-                          child: MaterialButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                setState(() {
-                                  loading = true;
-                                });
-                              }
-                              print(form);
-                            },
-                            child: Text('Submit'),
-                            height: 50,
-                            minWidth: double.infinity,
-                            color: Colors.white,
-                            textColor: Theme.of(context).primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(50),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                    ],
                   ),
                 ),
               ),

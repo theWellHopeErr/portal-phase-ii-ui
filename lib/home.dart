@@ -48,8 +48,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   int _selectedIndex = 0;
   static final List<Widget> _widgetOptions = <Widget>[
-    WorkOrderListWidget(),
     NotificationsListWidget(),
+    WorkOrderListWidget(),
   ];
 
   void _onItemTapped(int index) {
@@ -189,42 +189,6 @@ class _HomeWidgetState extends State<HomeWidget> {
             icon: Stack(
               children: <Widget>[
                 Icon(
-                  Icons.receipt_long,
-                  size: 30,
-                ),
-                Visibility(
-                  visible: _workorderNotifCount != 0,
-                  child: Positioned(
-                    right: 0,
-                    child: Container(
-                      padding: EdgeInsets.all(1),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      constraints: BoxConstraints(
-                        minWidth: 15,
-                        minHeight: 15,
-                      ),
-                      child: Text(
-                        '$_workorderNotifCount',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
-            label: 'Work Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Stack(
-              children: <Widget>[
-                Icon(
                   Icons.campaign,
                   size: 30,
                 ),
@@ -256,6 +220,42 @@ class _HomeWidgetState extends State<HomeWidget> {
               ],
             ),
             label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Stack(
+              children: <Widget>[
+                Icon(
+                  Icons.receipt_long,
+                  size: 30,
+                ),
+                Visibility(
+                  visible: _workorderNotifCount != 0,
+                  child: Positioned(
+                    right: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 15,
+                        minHeight: 15,
+                      ),
+                      child: Text(
+                        '$_workorderNotifCount',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            label: 'Work Orders',
           ),
         ],
         currentIndex: _selectedIndex,
