@@ -32,20 +32,23 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
     });
   }
 
-  Future<List<dynamic>> fetchRELList() async {
+  Future<List<dynamic>> fetchCRTDList() async {
     if (woResult == null || woResult?.isEmpty) await fetchList();
-    var result = woResult['rel']['item'];
-    return result.sublist(0, result.length > 10 ? 11 : result.length);
+    var result = woResult['crtd']['item'];
+    return result.sublist(
+        result.length > 10 ? result.length - 10 : 0, result.length);
   }
 
-  Future<List<dynamic>> fetchCRTDList() async {
-    var result = woResult['crtd']['item'];
-    return result.sublist(0, result.length > 10 ? 11 : result.length);
+  Future<List<dynamic>> fetchRELList() async {
+    var result = woResult['rel']['item'];
+    return result.sublist(
+        result.length > 10 ? result.length - 10 : 0, result.length);
   }
 
   Future<List<dynamic>> fetchTECOList() async {
     var result = woResult['teco']['item'];
-    return result.sublist(0, result.length > 10 ? 11 : result.length);
+    return result.sublist(
+        result.length > 10 ? result.length - 10 : 0, result.length);
   }
 
   @override
@@ -110,20 +113,20 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
                 [
                   SizedBox(height: 20.0),
                   ExpansionTile(
-                    textColor: Colors.amber[900],
+                    textColor: Colors.red[900],
+                    iconColor: Colors.red[900],
                     initiallyExpanded: true,
-                    iconColor: Colors.amber[900],
-                    collapsedTextColor: Colors.amber,
-                    collapsedIconColor: Colors.amber,
+                    collapsedTextColor: Colors.red,
+                    collapsedIconColor: Colors.red,
                     title: Text(
-                      'Released (REL)',
+                      'Created (CRTD)',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     children: [
                       FutureBuilder<List<dynamic>>(
-                        future: fetchRELList(),
+                        future: fetchCRTDList(),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
                           if (snapshot.hasData) {
@@ -154,19 +157,19 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
                     ],
                   ),
                   ExpansionTile(
-                    textColor: Colors.red[900],
-                    iconColor: Colors.red[900],
-                    collapsedTextColor: Colors.red,
-                    collapsedIconColor: Colors.red,
+                    textColor: Colors.amber[900],
+                    iconColor: Colors.amber[900],
+                    collapsedTextColor: Colors.amber,
+                    collapsedIconColor: Colors.amber,
                     title: Text(
-                      'Created (CRTD)',
+                      'Released (REL)',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     children: [
                       FutureBuilder<List<dynamic>>(
-                        future: fetchCRTDList(),
+                        future: fetchRELList(),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
                           if (snapshot.hasData) {

@@ -170,99 +170,97 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return OverlaySupport(
-      child: Scaffold(
-        body: Center(
-          child: DefaultTextStyle.merge(
-            style: TextStyle(color: Colors.grey[850]),
-            child: Container(
-              color: const Color(0xfff3f3f3),
-              width: double.infinity,
-              height: double.infinity,
-              child: _widgetOptions.elementAt(_selectedIndex),
-            ),
+    return Scaffold(
+      body: Center(
+        child: DefaultTextStyle.merge(
+          style: TextStyle(color: Colors.grey[850]),
+          child: Container(
+            color: const Color(0xfff3f3f3),
+            width: double.infinity,
+            height: double.infinity,
+            child: _widgetOptions.elementAt(_selectedIndex),
           ),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          items: [
-            BottomNavigationBarItem(
-              icon: Stack(
-                children: <Widget>[
-                  Icon(
-                    Icons.campaign,
-                    size: 30,
-                  ),
-                  Visibility(
-                    visible: _notificationNotifCount != 0,
-                    child: Positioned(
-                      right: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(1),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(6),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        items: [
+          BottomNavigationBarItem(
+            icon: Stack(
+              children: <Widget>[
+                Icon(
+                  Icons.campaign,
+                  size: 30,
+                ),
+                Visibility(
+                  visible: _notificationNotifCount != 0,
+                  child: Positioned(
+                    right: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 15,
+                        minHeight: 15,
+                      ),
+                      child: Text(
+                        '$_notificationNotifCount',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
                         ),
-                        constraints: BoxConstraints(
-                          minWidth: 15,
-                          minHeight: 15,
-                        ),
-                        child: Text(
-                          '$_notificationNotifCount',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                  )
-                ],
-              ),
-              label: 'Notifications',
-            ),
-            BottomNavigationBarItem(
-              icon: Stack(
-                children: <Widget>[
-                  Icon(
-                    Icons.receipt_long,
-                    size: 30,
                   ),
-                  Visibility(
-                    visible: _workorderNotifCount != 0,
-                    child: Positioned(
-                      right: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(1),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(6),
+                )
+              ],
+            ),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Stack(
+              children: <Widget>[
+                Icon(
+                  Icons.receipt_long,
+                  size: 30,
+                ),
+                Visibility(
+                  visible: _workorderNotifCount != 0,
+                  child: Positioned(
+                    right: 0,
+                    child: Container(
+                      padding: EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 15,
+                        minHeight: 15,
+                      ),
+                      child: Text(
+                        '$_workorderNotifCount',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
                         ),
-                        constraints: BoxConstraints(
-                          minWidth: 15,
-                          minHeight: 15,
-                        ),
-                        child: Text(
-                          '$_workorderNotifCount',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                  )
-                ],
-              ),
-              label: 'Work Orders',
+                  ),
+                )
+              ],
             ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.amber[800],
-          onTap: _onItemTapped,
-        ),
+            label: 'Work Orders',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
       ),
     );
   }

@@ -59,7 +59,6 @@ class _WorkOrderItemState extends State<WorkOrderItem> {
     );
 
     var body = json.decode(result.body);
-
     setState(() {
       workorder['ORDER_TYPE'] = body['details']!['ORDER_TYPE'];
       workorder['EQUIPMENT'] = body['details']!['EQUIPMENT'];
@@ -133,7 +132,8 @@ class _WorkOrderItemState extends State<WorkOrderItem> {
             title: Text(snapshot.data[index]['DESCRIPTION']),
             actions: [
               Visibility(
-                visible: !isEditable,
+                visible:
+                    !isEditable && snapshot.data[index]['S_STATUS'] == 'CRTD',
                 child: IconButton(
                   onPressed: () => setState(() {
                     isEditable = true;
