@@ -33,20 +33,29 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
     });
   }
 
-  Future<List<dynamic>> fetchNOPRList() async {
+  Future<List<dynamic>> fetchOSNOList() async {
     if (notifResult == null || notifResult?.isEmpty) await fetchList();
-    var result = notifResult['nopr']['item'];
-    return result.sublist(0, result.length > 10 ? 11 : result.length);
+    var result = notifResult['osno']['item'];
+    if (result is List)
+      return result.sublist(0, result.length > 10 ? 11 : result.length);
+    else
+      return [result];
   }
 
-  Future<List<dynamic>> fetchOSNOList() async {
-    var result = notifResult['osno']['item'];
-    return result.sublist(0, result.length > 10 ? 11 : result.length);
+  Future<List<dynamic>> fetchNOPRList() async {
+    var result = notifResult['nopr']['item'];
+    if (result is List)
+      return result.sublist(0, result.length > 10 ? 11 : result.length);
+    else
+      return [result];
   }
 
   Future<List<dynamic>> fetchNOCOList() async {
     var result = notifResult['noco']['item'];
-    return result.sublist(0, result.length > 10 ? 11 : result.length);
+    if (result is List)
+      return result.sublist(0, result.length > 10 ? 11 : result.length);
+    else
+      return [result];
   }
 
   @override
@@ -71,6 +80,7 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
           expandedHeight: 200.0,
           slivers: <Widget>[
             SliverAppBar(
+              backgroundColor: Color(0xFF7C4DFF),
               expandedHeight: 200.0,
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
@@ -113,19 +123,19 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
                   SizedBox(height: 20.0),
                   ExpansionTile(
                     initiallyExpanded: true,
-                    textColor: Colors.amber[900],
-                    iconColor: Colors.amber[900],
-                    collapsedTextColor: Colors.amber,
-                    collapsedIconColor: Colors.amber,
+                    textColor: Colors.red[900],
+                    iconColor: Colors.red[900],
+                    collapsedTextColor: Colors.red,
+                    collapsedIconColor: Colors.red,
                     title: Text(
-                      'In Progress (NOPR)',
+                      'Pending (OSNO)',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     children: [
                       FutureBuilder<List<dynamic>>(
-                        future: fetchNOPRList(),
+                        future: fetchOSNOList(),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
                           if (snapshot.hasData) {
@@ -156,19 +166,19 @@ class _NotificationsListWidgetState extends State<NotificationsListWidget> {
                     ],
                   ),
                   ExpansionTile(
-                    textColor: Colors.red[900],
-                    iconColor: Colors.red[900],
-                    collapsedTextColor: Colors.red,
-                    collapsedIconColor: Colors.red,
+                    textColor: Colors.amber[900],
+                    iconColor: Colors.amber[900],
+                    collapsedTextColor: Colors.amber,
+                    collapsedIconColor: Colors.amber,
                     title: Text(
-                      'Pending (OSNO)',
+                      'In Progress (NOPR)',
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     children: [
                       FutureBuilder<List<dynamic>>(
-                        future: fetchOSNOList(),
+                        future: fetchNOPRList(),
                         builder:
                             (BuildContext context, AsyncSnapshot snapshot) {
                           if (snapshot.hasData) {
