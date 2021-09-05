@@ -67,9 +67,7 @@ class NotificationListItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            snapshot.data[index]['DESCRIPT'].isEmpty
-                                ? 'General Mainte...'
-                                : snapshot.data[index]['DESCRIPT'],
+                            snapshot.data[index]['DESCRIPT'].toString(),
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:portal_phase_ii_ui/helpers.dart';
+import 'package:portal_phase_ii_ui/notification/notification-item.dart';
 
 class NotificationCreate extends StatefulWidget {
   const NotificationCreate({Key? key}) : super(key: key);
@@ -419,25 +420,55 @@ class _NotificationCreateState extends State<NotificationCreate> {
                               ),
                             ),
                             Visibility(
-                              visible: !loading,
+                              visible: message.isNotEmpty,
                               child: MaterialButton(
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
-                                    setState(() {
-                                      loading = true;
-                                    });
-                                    onSubmit();
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //       builder: (context) =>
-                                    //           NotificationItem(
-                                    //             notifNo: notificationNo.toString(),
-                                    //           )),
-                                    // );
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => NotificationItem(
+                                          notifNo: notificationNo.toString(),
+                                        ),
+                                      ),
+                                    );
                                   }
                                 },
-                                child: Text('Submit'),
+                                child: Text('View Notification'),
+                                height: 50,
+                                minWidth: double.infinity,
+                                color: Colors.white,
+                                textColor: Theme.of(context).primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: new BorderRadius.circular(50),
+                                ),
+                              ),
+                            ),
+                            Visibility(
+                              visible: message.isNotEmpty ||
+                                  error.isNotEmpty ||
+                                  loading,
+                              child: SizedBox(
+                                height: 10,
+                              ),
+                            ),
+                            Visibility(
+                              visible: !loading,
+                              child: MaterialButton(
+                                onPressed: () {
+                                  if (message.isEmpty) {
+                                    if (_formKey.currentState!.validate()) {
+                                      setState(() {
+                                        loading = true;
+                                      });
+                                      onSubmit();
+                                    }
+                                  } else {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                child:
+                                    Text(message.isEmpty ? 'Submit' : 'Close'),
                                 height: 50,
                                 minWidth: double.infinity,
                                 color: Colors.white,

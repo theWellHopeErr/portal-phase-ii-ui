@@ -150,8 +150,8 @@ class _NotificationItemState extends State<NotificationItem> {
         child: Scaffold(
           appBar: AppBar(
             title: Text(notification['SHORT_TEXT'] == 'Loading...'
-                ? notifNo
-                : notification['SHORT_TEXT']),
+                ? notifNo.toString()
+                : notification['SHORT_TEXT'].toString()),
             actions: [
               Visibility(
                 visible: !isEditable,
