@@ -35,20 +35,26 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
   Future<List<dynamic>> fetchCRTDList() async {
     if (woResult == null || woResult?.isEmpty) await fetchList();
     var result = woResult['crtd']['item'];
-    return result.sublist(
-        result.length > 10 ? result.length - 10 : 0, result.length);
+    if (result is List)
+      return result.sublist(0, result.length > 20 ? 21 : result.length);
+    else
+      return [result];
   }
 
   Future<List<dynamic>> fetchRELList() async {
     var result = woResult['rel']['item'];
-    return result.sublist(
-        result.length > 10 ? result.length - 10 : 0, result.length);
+    if (result is List)
+      return result.sublist(0, result.length > 10 ? 11 : result.length);
+    else
+      return [result];
   }
 
   Future<List<dynamic>> fetchTECOList() async {
     var result = woResult['teco']['item'];
-    return result.sublist(
-        result.length > 10 ? result.length - 10 : 0, result.length);
+    if (result is List)
+      return result.sublist(0, result.length > 10 ? 11 : result.length);
+    else
+      return [result];
   }
 
   @override
@@ -72,6 +78,7 @@ class _WorkOrderListWidgetState extends State<WorkOrderListWidget> {
           expandedHeight: 200.0,
           slivers: <Widget>[
             SliverAppBar(
+              backgroundColor: Color(0xFF7C4DFF),
               expandedHeight: 200.0,
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(

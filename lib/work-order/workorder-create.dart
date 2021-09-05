@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:portal_phase_ii_ui/helpers.dart';
-import 'package:portal_phase_ii_ui/notification/notification-item.dart';
 
 class WorkOrderCreate extends StatefulWidget {
   const WorkOrderCreate({Key? key}) : super(key: key);
@@ -130,7 +129,7 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                         ),
                         decoration: InputDecoration(
                             border: OutlineInputBorder(),
-                            labelText: 'Equipment No*',
+                            labelText: 'Notification No',
                             labelStyle: TextStyle(
                               color: const Color(0xFF424242),
                               fontWeight: FontWeight.w500,
@@ -142,10 +141,9 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                             )),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Equipment No';
+                            formData['notif_no'] = null;
                           }
-                          formData['equip_id'] = value;
-                          return null;
+                          formData['notif_no'] = value;
                         },
                       ),
                       SizedBox(
@@ -173,6 +171,34 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                             return 'Please enter Functional Location';
                           }
                           formData['order_type'] = value;
+                          return null;
+                        },
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      TextFormField(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                        ),
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            labelText: 'Equipment No*',
+                            labelStyle: TextStyle(
+                              color: const Color(0xFF424242),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Colors.black,
+                              ),
+                            )),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter Equipment No';
+                          }
+                          formData['equip_id'] = value;
                           return null;
                         },
                       ),
@@ -247,22 +273,19 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                               visible: !loading,
                               child: MaterialButton(
                                 onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    setState(() {
-                                      loading = true;
-                                    });
-                                    onSubmit();
-                                    // Navigator.push(
-                                    //   context,
-                                    //   MaterialPageRoute(
-                                    //       builder: (context) =>
-                                    //           NotificationItem(
-                                    //             notifNo: notificationNo.toString(),
-                                    //           )),
-                                    // );
+                                  if (message.isEmpty) {
+                                    if (_formKey.currentState!.validate()) {
+                                      setState(() {
+                                        loading = true;
+                                      });
+                                      onSubmit();
+                                    }
+                                  } else {
+                                    Navigator.pop(context);
                                   }
                                 },
-                                child: Text('Submit'),
+                                child:
+                                    Text(message.isEmpty ? 'Submit' : 'Close'),
                                 height: 50,
                                 minWidth: double.infinity,
                                 color: Colors.white,
