@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:portal_phase_ii_ui/helpers.dart';
 import 'package:portal_phase_ii_ui/notification/notification-item.dart';
@@ -60,6 +61,25 @@ class _NotificationCreateState extends State<NotificationCreate> {
         message = 'Notification Created With $notificationNo';
       });
       print(json.decode(response.body));
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var fcmToken = prefs.getString('fcmToken');
+      var fcmResponse = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader:
+              'key=AAAAtIuOlak:APA91bFdsvYpCO8vOQDzhQTbu7X8Zj_XPZLcN_8dK_3EKuKZ_J02EiwVvABOFXb4wskjya2xOjk6VwxUhtqznShbGYub3IMfEMlfvTAWN7AVe9TkArsliScpGYZ84rIFh1aK4IIRK-S4',
+        },
+        body: jsonEncode({
+          "to": "$fcmToken",
+          "notification": {"title": "New Notification created", "body": "Notification No: $notificationNo"}
+        }),
+      );
+      if (fcmResponse.statusCode == 200) {
+      } else {
+        throw Exception('Error in FCM.');
+      }
     } else {
       setState(() {
         loading = false;

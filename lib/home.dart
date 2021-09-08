@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:overlay_support/overlay_support.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:portal_phase_ii_ui/notification/notifications-list.dart';
 import 'package:portal_phase_ii_ui/work-order/workorders-list.dart';
@@ -61,7 +62,12 @@ class _HomeWidgetState extends State<HomeWidget> {
   void registerNotification() async {
     await Firebase.initializeApp();
     _messaging = FirebaseMessaging.instance;
-    print("FCM Token: ${await _messaging.getToken()}");
+
+    String fcmToken = (await _messaging.getToken()).toString();
+    print("FCM Token: $fcmToken}");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('fcmToken', fcmToken);
+
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     NotificationSettings settings = await _messaging.requestPermission(
@@ -93,22 +99,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             _workorderNotifCount++;
         });
 
-        if (_notificationInfo != null) {
-          // For displaying the notification as an overlay
-          showSimpleNotification(
-            Text(_notificationInfo!.title!),
-            leading: NotificationBadge(
-                totalNotifications:
-                    notification.title!.toLowerCase().contains('Work Order')
-                        ? _workorderNotifCount
-                        : _notificationNotifCount),
-            slideDismissDirection: DismissDirection.horizontal,
-            subtitle: Text(_notificationInfo!.body!),
-            background: Colors.blueAccent,
-            foreground: Colors.white,
-            duration: Duration(seconds: 5),
-          );
-        }
+        showNotification(_notificationInfo!.title.toString(),
+            _notificationInfo!.body.toString());
       });
     } else {
       print('User declined or has not accepted permission');
@@ -137,6 +129,31 @@ class _HomeWidgetState extends State<HomeWidget> {
           _workorderNotifCount++;
       });
     }
+  }
+
+  showNotification(String title, String body) async {
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+        FlutterLocalNotificationsPlugin();
+    var initializationSettingsAndroid =
+        new AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsIOS = new IOSInitializationSettings();
+    var initializationSettings = new InitializationSettings(
+        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'channel_ID', 'channel name', 'channel description',
+        importance: Importance.max,
+        playSound: true,
+        showProgress: true,
+        priority: Priority.high,
+        ticker: 'test ticker');
+
+    var platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin
+        .show(0, title, body, platformChannelSpecifics, payload: 'test');
   }
 
   @override

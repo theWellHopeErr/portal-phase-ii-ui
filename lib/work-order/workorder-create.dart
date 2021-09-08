@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:portal_phase_ii_ui/helpers.dart';
 
@@ -52,6 +53,28 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
         message = 'Work Order Created With $workOrderNo';
       });
       print(json.decode(response.body));
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var fcmToken = prefs.getString('fcmToken');
+      var fcmResponse = await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          HttpHeaders.authorizationHeader:
+              'key=AAAAtIuOlak:APA91bFdsvYpCO8vOQDzhQTbu7X8Zj_XPZLcN_8dK_3EKuKZ_J02EiwVvABOFXb4wskjya2xOjk6VwxUhtqznShbGYub3IMfEMlfvTAWN7AVe9TkArsliScpGYZ84rIFh1aK4IIRK-S4',
+        },
+        body: jsonEncode({
+          "to": "$fcmToken",
+          "notification": {
+            "title": "New Work Order created",
+            "body": "Work Order No: $workOrderNo"
+          }
+        }),
+      );
+      if (fcmResponse.statusCode == 200) {
+      } else {
+        throw Exception('Error in FCM.');
+      }
     } else {
       setState(() {
         loading = false;
@@ -101,7 +124,7 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                         ),
                         decoration: InputDecoration(
                             border: OutlineInputBorder(),
-                            labelText: 'Notification Type*',
+                            labelText: 'Order Type*',
                             labelStyle: TextStyle(
                               color: const Color(0xFF424242),
                               fontWeight: FontWeight.w500,
@@ -113,9 +136,9 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                             )),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Notification Type';
+                            return 'Please enter Order Type';
                           }
-                          formData['notif_type'] = value;
+                          formData['order_type'] = value;
                           return null;
                         },
                       ),
@@ -155,22 +178,23 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                           color: Colors.grey[700],
                         ),
                         decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Order Type*',
-                            labelStyle: TextStyle(
-                              color: const Color(0xFF424242),
-                              fontWeight: FontWeight.w500,
+                          border: OutlineInputBorder(),
+                          labelText: 'Notification Type',
+                          labelStyle: TextStyle(
+                            color: const Color(0xFF424242),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black,
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Colors.black,
-                              ),
-                            )),
+                          ),
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Functional Location';
+                            formData['notif_type'] = null;
                           }
-                          formData['order_type'] = value;
+                          formData['notif_type'] = value;
                           return null;
                         },
                       ),
