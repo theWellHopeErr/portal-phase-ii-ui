@@ -64,7 +64,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _messaging = FirebaseMessaging.instance;
 
     String fcmToken = (await _messaging.getToken()).toString();
-    print("FCM Token: $fcmToken}");
+    print("FCM Token: $fcmToken");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('fcmToken', fcmToken);
 

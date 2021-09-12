@@ -61,7 +61,7 @@ class WorkOrderListItem extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            snapshot.data[index]['DESCRIPTION'],
+                            snapshot.data[index]['DESCRIPTION'].toString(),
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
@@ -85,17 +85,16 @@ class WorkOrderListItem extends StatelessWidget {
                         "${int.parse(snapshot.data[index]['ACTIVITY'])}",
                         style: TextStyle(
                           fontSize: 11,
-                          color: getPriorityColor(snapshot.data[index]['P']),
                         ),
                       ),
                       SizedBox(height: 6),
                       Text(
-                        '${snapshot.data[index]['WORK_ACTIVITY']} Hrs',
+                        getPriority("${snapshot.data[index]['PRIORITY']}"),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: getWorkActivityColor(
-                              snapshot.data[index]['S_STATUS']),
+                          color: getPriorityColor(
+                              '${snapshot.data[index]['PRIORITY']}'),
                         ),
                       ),
                     ],

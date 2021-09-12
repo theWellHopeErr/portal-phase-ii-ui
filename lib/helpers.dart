@@ -27,7 +27,7 @@ String getPriority(String val) {
     case '4':
       return 'Low';
     default:
-      return 'Whenever';
+      return 'Medium';
   }
 }
 
@@ -42,7 +42,7 @@ dynamic getPriorityColor(String val) {
     case '4':
       return Colors.green;
     default:
-      return Colors.black;
+      return Colors.yellow;
   }
 }
 
