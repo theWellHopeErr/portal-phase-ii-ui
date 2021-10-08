@@ -73,7 +73,10 @@ class _NotificationCreateState extends State<NotificationCreate> {
         },
         body: jsonEncode({
           "to": "$fcmToken",
-          "notification": {"title": "New Notification created", "body": "Notification No: $notificationNo"}
+          "notification": {
+            "title": "New Notification created",
+            "body": "Notification No: $notificationNo"
+          }
         }),
       );
       if (fcmResponse.statusCode == 200) {
@@ -142,7 +145,7 @@ class _NotificationCreateState extends State<NotificationCreate> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Notification Type';
                           }
-                          formData['notif_type'] = value;
+                          formData['notif_type'] = value.toUpperCase();
                           return null;
                         },
                       ),
@@ -396,7 +399,7 @@ class _NotificationCreateState extends State<NotificationCreate> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Reported by';
                           }
-                          formData['reported_by'] = value;
+                          formData['reported_by'] = value.toUpperCase();
                           return null;
                         },
                       ),

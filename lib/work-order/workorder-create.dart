@@ -44,12 +44,14 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
       },
       body: jsonEncode(formData),
     );
+
     if (response.statusCode == 201) {
+      var responseMessage = json.decode(response.body)['message'];
       setState(() {
         loading = false;
         error = '';
-        workOrderNo =
-            int.parse(json.decode(response.body)['message'][2].split(' ')[5]);
+        workOrderNo = int.parse(
+            responseMessage[responseMessage.length - 2].split(' ')[5]);
         message = 'Work Order Created With $workOrderNo';
       });
       print(json.decode(response.body));
@@ -138,7 +140,7 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Order Type';
                           }
-                          formData['order_type'] = value;
+                          formData['order_type'] = value.toUpperCase();
                           return null;
                         },
                       ),
@@ -222,7 +224,7 @@ class _WorkOrderCreateState extends State<WorkOrderCreate> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Equipment No';
                           }
-                          formData['equip_id'] = value;
+                          formData['equip_id'] = value.toUpperCase();
                           return null;
                         },
                       ),
